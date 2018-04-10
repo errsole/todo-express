@@ -1,11 +1,23 @@
-var express = require('express');
+var errsole = require('errsole');
+
+errsole.initialize('express', '6e194e2826ade79ef67515e7cc5f5');
+errsole.config({
+  expressSession: 'express-session'
+});
+
+var express      = errsole.express;
+var expressSession = errsole.expressSession;
+var app          = express();
+
 var routes = require('./routes');
 var tasks = require('./routes/tasks');
 var http = require('http');
 var path = require('path');
 var mongoskin = require('mongoskin');
+
+
 var db = mongoskin.db('mongodb://localhost:27017/todo?auto_reconnect', {safe:true});
-var app = express();
+
 
 var favicon = require('serve-favicon'),
   logger = require('morgan'),
@@ -13,8 +25,7 @@ var favicon = require('serve-favicon'),
   methodOverride = require('method-override'),
   cookieParser = require('cookie-parser'),
   session = require('express-session'),
-  csrf = require('csurf'),
-  errorHandler = require('errorhandler');
+  csrf = require('csurf');
 
 app.use(function(req, res, next) {
   req.db = {};
@@ -33,12 +44,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
 app.use(cookieParser('CEAF3FA4-F385-49AA-8FE4-54766A9874F1'));
-app.use(session({
+app.use(expressSession({
   secret: '59B93087-78BC-4EB9-993A-A61FC844F6C9',
   resave: true,
   saveUninitialized: true
 }));
 app.use(csrf());
+
 
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -67,10 +79,10 @@ app.get('/tasks/completed', tasks.completed);
 app.all('*', function(req, res){
   res.status(404).send();
 })
-// development only
-if ('development' == app.get('env')) {
-  app.use(errorHandler());
-}
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+
+
+var port = errsole.wrapPort(process.env.PORT || 9000);
+
+http.createServer(app).listen(port, function(){
+  console.log('Express server listening on port ' + port);
 });
