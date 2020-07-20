@@ -1,3 +1,6 @@
+require('newrelic');
+
+
 var errsole = require('errsole');
 
 errsole.initialize('express', '6e194e2826ade79ef67515e7cc5f5');
